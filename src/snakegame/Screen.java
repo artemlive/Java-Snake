@@ -49,6 +49,7 @@ public class Screen extends JPanel implements Runnable, KeyListener{
         int updates = 0, fps = 0;
         System.out.println("Start");
         long timer = System.currentTimeMillis();
+        
         while(isRunning){
               // work out how long its been since the last update, this
             long now = System.nanoTime();
@@ -57,6 +58,7 @@ public class Screen extends JPanel implements Runnable, KeyListener{
             //System.out.println("Delta: " + delta);
             if(delta >= 1)
             {
+
                 tick();
                 updates++;
                 fps++;
@@ -85,18 +87,25 @@ public class Screen extends JPanel implements Runnable, KeyListener{
         switch(e.getKeyCode())
         {
             case KeyEvent.VK_UP:
-                direction = 1;
-                System.out.println("direction = 1");
+                if(direction != -1){
+                    direction = 1;
+                }
                 break;
                 
             case KeyEvent.VK_DOWN:
-                direction = -1;
+                if(direction != 1){
+                    direction = -1;
+                }
                 break;
             case KeyEvent.VK_RIGHT:
-                direction = 2;
+                if(direction != -2){
+                    direction = 2;
+                }
                 break;
             case KeyEvent.VK_LEFT:
-                direction = -2;
+                if(direction != 2){
+                    direction = -2;
+                }
                 break;
         }
     }
