@@ -6,14 +6,16 @@
 
 package snakegame;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.awt.Color;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
@@ -24,16 +26,19 @@ public class Screen extends JPanel implements Runnable, KeyListener{
 
     private ArrayList <SnakeBodyPart> snake;
     private static int WIDTH = 800, HEIGHT = 800;
-    private int snakeSize = 10, TILESIZE = 10;
+    private int snakeSize = 8, TILESIZE = 10;
     boolean isRunning = false;
     private Thread thread;
-    private int direction = 1;
+    private int direction = -1;
+    private boolean fruitIsEatten = true;
+    private ArrayList <Fruit> fruit;
     
     public Screen(){
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         addKeyListener(this);
         setFocusable(true);
         initSnake();
+        initFruit();
         start();
     }
     
@@ -42,7 +47,7 @@ public class Screen extends JPanel implements Runnable, KeyListener{
     public void run() {
 
         //I think, that 60 ticks in sec, will be enough
-        final double amountOfTicks = 15.0;
+        double amountOfTicks = 10.0;
         long lastTime = System.nanoTime(); //get current time
         double ns = 1000000000 / amountOfTicks; //nanoseconds to seconds devider
         double delta = 0;
@@ -58,7 +63,6 @@ public class Screen extends JPanel implements Runnable, KeyListener{
             //System.out.println("Delta: " + delta);
             if(delta >= 1)
             {
-
                 tick();
                 updates++;
                 fps++;
@@ -83,7 +87,7 @@ public class Screen extends JPanel implements Runnable, KeyListener{
 
     @Override
     public void keyPressed(KeyEvent e) {
-        System.out.println("pressed key");
+    //    System.out.println("Pressed key: " + e.getKeyChar());
         switch(e.getKeyCode())
         {
             case KeyEvent.VK_UP:
@@ -123,7 +127,13 @@ public class Screen extends JPanel implements Runnable, KeyListener{
         }
     }
 
-
+    private void initFruit() {
+        fruit = new ArrayList<Fruit>();
+        Random rn = new Random();
+        fruit.add(new Fruit(rn.nextInt((WIDTH / TILESIZE)) , rn.nextInt(HEIGHT / TILESIZE), TILESIZE));
+        System.out.println("Fruit x: " + fruit.get(0).getxCoor() + ", fruit y: " + fruit.get(0).getyCoor());
+    }
+    
     @Override
     public void paint(Graphics g){
         //System.out.println("Repainted");
@@ -134,7 +144,10 @@ public class Screen extends JPanel implements Runnable, KeyListener{
         {
             snake.get(i).draw(g);
         }
-
+        for(int i = 0; i < fruit.size(); ++i)
+        {
+            fruit.get(0).draw(g);
+        }
     }
 
     private void start() {
@@ -144,32 +157,57 @@ public class Screen extends JPanel implements Runnable, KeyListener{
     }
 
     private void tick() {
-        for(int i = 0; i < snakeSize; ++i)
-        {
-            int x = snake.get(i).getxCoor();
-            int y = snake.get(i).getyCoor();
-            System.out.println("X-part-" + i + "-coor:" + x + ", Y-part-" + i +"-coor:" + y);
-        }
+
         switch(direction)
         {
             case 1:
-                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor() -1, TILESIZE));
                 snake.remove(0);
+                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor() -1, TILESIZE));
                 break;
                 
             case -1:
-                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor() + 1, TILESIZE));
                 snake.remove(0);
+                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor() + 1, TILESIZE));
                 break;
             case 2:
-                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor() + 1, snake.get(snake.size() - 1).getyCoor(), TILESIZE));
                 snake.remove(0);
+                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor() + 1, snake.get(snake.size() - 1).getyCoor(), TILESIZE));
                 break;
                 
             case -2:
-                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor() - 1, snake.get(snake.size() - 1).getyCoor() , TILESIZE));
                 snake.remove(0);
+                snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor() - 1, snake.get(snake.size() - 1).getyCoor() , TILESIZE));
                 break;                
+        }
+        System.out.println("snake head position: x = " + snake.get(snake.size() - 1).getxCoor() + ", y = " + snake.get(snake.size() - 1).getyCoor());
+        if(snake.get(snake.size() - 1).getxCoor() == fruit.get(0).getxCoor() && snake.get(snake.size() - 1).getyCoor() == fruit.get(0).getyCoor()){
+            System.out.println("Collision detected");
+            snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor(), TILESIZE));
+            snakeSize++;
+            fruit.clear();
+        }
+        for(int i = 0; i < snake.size() - 1; ++i)
+        {
+            if(snake.get(i).getxCoor() == snake.get(snake.size() - 1).getxCoor() && snake.get(i).getyCoor() == snake.get(snake.size() - 1).getyCoor())
+            {
+                  isRunning = false;
+                  JOptionPane.showMessageDialog(null, "Скушали сами себя!:(", "Проигрыш:(", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+         if(snake.get(snake.size() - 1).getxCoor() >= WIDTH / TILESIZE ||
+                 snake.get(snake.size() - 1).getxCoor() < 0 || 
+                 snake.get(snake.size() - 1).getyCoor() >= HEIGHT / TILESIZE ||
+                 snake.get(snake.size() - 1).getyCoor() < 0){
+             
+             isRunning = false;
+             JOptionPane.showMessageDialog(null, "Вы проиграли! Нам оооочень жаль!", "Проигрыш:(", JOptionPane.INFORMATION_MESSAGE);
+             //TODO: System menu, again exit etc
+             System.exit(0);
+         }
+        if(fruit.isEmpty()) {
+            Random rn = new Random();
+            fruit.add(new Fruit(rn.nextInt(WIDTH / TILESIZE), rn.nextInt(HEIGHT / TILESIZE), TILESIZE));
+            System.out.println("Fruit x: " + fruit.get(0).getxCoor() + ", fruit y: " + fruit.get(0).getyCoor());
         }
     }
    
