@@ -181,8 +181,22 @@ public class Screen extends JPanel implements Runnable, KeyListener{
         }
         System.out.println("snake head position: x = " + snake.get(snake.size() - 1).getxCoor() + ", y = " + snake.get(snake.size() - 1).getyCoor());
         if(snake.get(snake.size() - 1).getxCoor() == fruit.get(0).getxCoor() && snake.get(snake.size() - 1).getyCoor() == fruit.get(0).getyCoor()){
-            System.out.println("Collision detected");
-            snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor(), TILESIZE));
+            switch(direction)
+            {
+                case 1:
+                    snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor() -1, TILESIZE));
+                break;
+                case -1:
+                    snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor(), snake.get(snake.size() - 1).getyCoor() + 1, TILESIZE));
+                break;
+                case 2:
+                    snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor() + 1, snake.get(snake.size() - 1).getyCoor(), TILESIZE));
+                break;
+                case -2:
+                    snake.add(new SnakeBodyPart(snake.get(snake.size() - 1).getxCoor() - 1, snake.get(snake.size() - 1).getyCoor() , TILESIZE));
+                break;                
+            }
+            //System.out.println("Collision detected");
             snakeSize++;
             fruit.clear();
         }
