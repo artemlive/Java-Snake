@@ -42,7 +42,6 @@ public class Screen extends JPanel implements Runnable, KeyListener{
         start();
     }
     
-    
     @Override
     public void run() {
 
@@ -76,7 +75,6 @@ public class Screen extends JPanel implements Runnable, KeyListener{
                 updates = 0;
                 fps = 0;
             }
-
         }
     }
 
